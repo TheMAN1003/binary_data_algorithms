@@ -18,10 +18,3 @@ def enc(data: bytes) -> bytes:
             encoded_text.append(L)
             encoded_text.extend(data[j:i])
     return bytes(encoded_text)
-
-if __name__ == "__main__":
-    text = b"bbbb"
-    print("Original:", text)
-
-    compressed = enc(text)
-    print("Compressed:", compressed)
