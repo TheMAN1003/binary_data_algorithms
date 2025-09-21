@@ -1,3 +1,5 @@
+import sys
+
 def dec(data: bytes) -> bytes:
     i = 0
     decoded_text = bytearray()
@@ -19,3 +21,20 @@ def dec(data: bytes) -> bytes:
             i += l
 
     return bytes(decoded_text)
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Некоректна кількість аргументів на вхід у декодер")
+        sys.exit(1)
+
+    input, output = sys.argv[1], sys.argv[2]
+
+    with open(input, "rb") as input_f:
+        data = input_f.read()
+
+    decoded_text = dec(data)
+
+    with open(output, "wb") as output_f:
+        output_f.write(decoded_text)
+
+    print(f"Успішно декодовано файл {input} у файл {output} використовуючи RLE!")
