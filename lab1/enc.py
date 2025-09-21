@@ -40,7 +40,6 @@ if __name__ == "__main__":
         data = input_f.read()
 
     encoded_text = enc(data)
-    print(encoded_text)
 
     with open(output, "wb") as output_f:
         output_f.write(encoded_text)
