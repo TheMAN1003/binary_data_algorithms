@@ -13,7 +13,7 @@ def dec(data: bytes) -> bytes:
             i += 1
         else: # different bytes
             l = (L & 0x7F) + 1
-            if i + l >= len(data):
+            if i + l > len(data):
                 raise ValueError("Недостатньо байтів у вхідному файлі")
             decoded_text.extend(data[i:i+l])
             i += l
