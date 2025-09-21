@@ -1,6 +1,7 @@
 def enc(data: bytes) -> bytes:
     i = 0
     encoded_text = bytearray()
+
     while i < len(data):
         l = 1
         while i + l < len(data) and data[i] == data[i+l] and l < 129:
@@ -17,4 +18,5 @@ def enc(data: bytes) -> bytes:
             L = (i - j) - 1
             encoded_text.append(L)
             encoded_text.extend(data[j:i])
+
     return bytes(encoded_text)
