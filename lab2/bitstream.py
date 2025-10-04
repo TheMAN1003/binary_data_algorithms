@@ -44,6 +44,7 @@ class bitStream:
             if self.readTail == 0:
                 byte = self.file.read(1)
                 if not byte:
+                    data.append(hex(self.readBuffer))
                     break
                 self.readBuffer = byte[0]
                 self.readTail = 8
@@ -70,11 +71,45 @@ bs.WriteBitSequence(a2, 9)
 del bs
 
 bs = bitStream("stream.bin", "rb")
-out1 = []
-out2 = []
-bs.ReadBitSequence(out1, 11)
-bs.ReadBitSequence(out2, 7)
+out = []
+bs.ReadBitSequence(out, 11)
+print("Результат першого читання", out)
+out.clear()
+bs.ReadBitSequence(out, 7)
+print("Результат другого читання", out)
+out.clear()
+del bs
 
-print("Перші 11 біт:", out1)
-print("Наступні 7 біт:", out2)
+bs = bitStream("stream.bin")
+a3 = bytes([0xFF])
+bs.WriteBitSequence(a3, 4)
+del bs
+
+bs = bitStream("stream.bin", "rb")
+bs.ReadBitSequence(out, 8)
+print("Результат третього читання", out)
+out.clear()
+del bs
+
+a4 = bytes([0xA, 0x4F])
+a5 = bytes([0x53, 0x5])
+bs = bitStream("stream.bin")
+bs.WriteBitSequence(a4, 10)
+bs.WriteBitSequence(a5, 3)
+del bs
+
+bs = bitStream("stream.bin", "rb")
+out = []
+bs.ReadBitSequence(out, 3)
+print("Результат четвертого читання", out)
+out.clear()
+bs.ReadBitSequence(out, 1)
+print("Результат п'ятого читання", out)
+out.clear()
+bs.ReadBitSequence(out, 5)
+print("Результат шостого читання", out)
+out.clear()
+bs.ReadBitSequence(out, 4)
+print("Результат сьомого читання", out)
+out.clear()
 del bs
