@@ -1,4 +1,4 @@
-class bitStream:
+class BitStream:
     
     def __init__(self, filename, mode='wb+'):
         self.filename = filename
@@ -20,7 +20,7 @@ class bitStream:
                 self.file.write(bytes([self.writeBuffer]))
             self.file.close()
 
-    def WriteBitSequence(self, data:bytes, length:int):
+    def write_bit_sequence(self, data:bytes, length:int):
         bit_length = 0
         for byte in data:
             for i in range(8):
@@ -36,7 +36,7 @@ class bitStream:
                 bit_length += 1
         print("Запис успішний")
 
-    def ReadBitSequence(self, data:list, length:int):
+    def read_bit_sequence(self, data:list, length:int):
         current_byte = 0
         bit_shift = 0
 
@@ -65,51 +65,51 @@ class bitStream:
 
 a1 = bytes([0xE1, 0x01])
 a2 = bytes([0xEE, 0x00])
-bs = bitStream("stream.bin")
-bs.WriteBitSequence(a1, 9)
-bs.WriteBitSequence(a2, 9)
+bs = BitStream("stream.bin")
+bs.write_bit_sequence(a1, 9)
+bs.write_bit_sequence(a2, 9)
 del bs
 
-bs = bitStream("stream.bin", "rb")
+bs = BitStream("stream.bin", "rb")
 out = []
-bs.ReadBitSequence(out, 11)
+bs.read_bit_sequence(out, 11)
 print("Результат першого читання", out)
 out.clear()
-bs.ReadBitSequence(out, 7)
+bs.read_bit_sequence(out, 7)
 print("Результат другого читання", out)
 out.clear()
 del bs
 
-bs = bitStream("stream.bin")
+bs = BitStream("stream.bin")
 a3 = bytes([0xFF])
-bs.WriteBitSequence(a3, 4)
+bs.write_bit_sequence(a3, 4)
 del bs
 
-bs = bitStream("stream.bin", "rb")
-bs.ReadBitSequence(out, 8)
+bs = BitStream("stream.bin", "rb")
+bs.read_bit_sequence(out, 8)
 print("Результат третього читання", out)
 out.clear()
 del bs
 
 a4 = bytes([0xA, 0x4F])
 a5 = bytes([0x53, 0x5])
-bs = bitStream("stream.bin")
-bs.WriteBitSequence(a4, 10)
-bs.WriteBitSequence(a5, 3)
+bs = BitStream("stream.bin")
+bs.write_bit_sequence(a4, 10)
+bs.write_bit_sequence(a5, 3)
 del bs
 
-bs = bitStream("stream.bin", "rb")
+bs = BitStream("stream.bin", "rb")
 out = []
-bs.ReadBitSequence(out, 3)
+bs.read_bit_sequence(out, 3)
 print("Результат четвертого читання", out)
 out.clear()
-bs.ReadBitSequence(out, 1)
+bs.read_bit_sequence(out, 1)
 print("Результат п'ятого читання", out)
 out.clear()
-bs.ReadBitSequence(out, 5)
+bs.read_bit_sequence(out, 5)
 print("Результат шостого читання", out)
 out.clear()
-bs.ReadBitSequence(out, 4)
+bs.read_bit_sequence(out, 4)
 print("Результат сьомого читання", out)
 out.clear()
 del bs
