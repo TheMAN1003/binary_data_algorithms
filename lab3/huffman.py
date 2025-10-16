@@ -1,6 +1,5 @@
 from struct import pack, unpack
 from heapq import heappush, heappop
-# from ..lab2.bitstream import BitStream
 
 class Node:
     def __init__(self, weight, symbol=None, left=None, right=None):
@@ -53,10 +52,56 @@ def code_table(node, prefix="", table=None):
 
     return table
 
+#для реалізації потрібно трохи змінити код з лаб 2, щоб він працював як застосування кодової таблиці на вхідне слово
+class BitStream:
+    
+    def __init__(self, filename, mode='wb+'):
+        self.filename = filename
+        self.file = None
+        try:
+            self.file = open(filename, mode)
+        except FileNotFoundError:
+            print(f"Потік {self.filename} не знайдено")
+        except Exception as e:
+            print(f"Сталася помилка під час відкриття: {e}")
+        self.writeBuffer = 0
+        self.writeFill = 0
+        self.readBuffer = 0
+        self.readTail = 0
+        
+    def __del__(self):
+        if self.file:
+            if self.writeFill > 0:
+                self.file.write(bytes([self.writeBuffer]))
+            self.file.close()
+
+    def write_bit_sequence(self, data:bytes, table:dict, freq:bytes):
+        self.file.write(freq)
+        self.file.write(pack('>Q', len(data)))
+        for byte in data:
+            bits = table[byte]
+            for str_bit in bits:
+                bit = int(str_bit)
+                self.writeBuffer |= (bit << self.writeFill)
+                self.writeFill += 1
+                if self.writeFill == 8:
+                    self.file.write(bytes([self.writeBuffer]))
+                    self.writeBuffer = 0
+                    self.writeFill = 0
+
 # data = b'a'*26+b'b'*25+b'c'*24+b'd'*23+b'e'*22+b'f'*21+b'g'*20+b'h'*19+b'i'*18+b'j'*17+b'k'*16+b'l'*15+b'm'*14+b'n'*13+b'o'*12+b'p'*11+b'q'*10+b'r'*9+b's'*8+b't'*7+b'u'*6+b'v'*5+b'w'*4+b'x'*3+b'y'*2+b'z'
-data = b'aaaaaaaaabbbbcde'
-freq_bytes = b''.join(pack('<I', data.count(i)) for i in range(256))
+data = b'aaaaaaaaabbbbcde' #replace with input file later
+assert len(data) <= (1<<32), "input file is too big"
+freq_bytes = count_frequencies(data)
 
 root = huffman_tree(freq_bytes)
 table = code_table(root)
 print(table)
+bs = BitStream("stream.bin")
+bs.write_bit_sequence(data, table, freq_bytes)
+del bs
+file = open("stream.bin", "rb")
+data = file.read()
+print(data[1032:])
+bit_string = ''.join(f'{byte:08b}' for byte in data[1032:])
+print(bit_string)
