@@ -75,7 +75,7 @@ class BitStream:
                 self.file.write(bytes([self.writeBuffer]))
             self.file.close()
 
-    def write_bit_sequence(self, data:bytes, table:dict, freq:bytes):
+    def encode_bit_sequence(self, data:bytes, table:dict, freq:bytes):
         self.file.write(freq)
         self.file.write(pack('>Q', len(data)))
         for byte in data:
@@ -89,19 +89,55 @@ class BitStream:
                     self.writeBuffer = 0
                     self.writeFill = 0
 
-# data = b'a'*26+b'b'*25+b'c'*24+b'd'*23+b'e'*22+b'f'*21+b'g'*20+b'h'*19+b'i'*18+b'j'*17+b'k'*16+b'l'*15+b'm'*14+b'n'*13+b'o'*12+b'p'*11+b'q'*10+b'r'*9+b's'*8+b't'*7+b'u'*6+b'v'*5+b'w'*4+b'x'*3+b'y'*2+b'z'
-data = b'aaaaaaaaabbbbcde' #replace with input file later
+    def decode_bit_sequence(self, data:bytes, table:dict, length:int):
+        decode_table = {v: k for k, v in table.items()}
+        current_length = length
+        bit_string = ''.join(f'{byte:08b}'[::-1] for byte in data)
+        current_string = ''
+        for bit in bit_string:
+            if current_length == 0:
+                break
+            current_string += bit
+            if current_string in decode_table:
+                self.file.write(decode_table[current_string].to_bytes(1, 'big'))
+                current_length -= 1
+                current_string = ''
+                
+            
+#writing part
+input_f = open("input.bin", "rb")
+data = input_f.read()
 assert len(data) <= (1<<32), "input file is too big"
-freq_bytes = count_frequencies(data)
 
+freq_bytes = count_frequencies(data)
 root = huffman_tree(freq_bytes)
 table = code_table(root)
-print(table)
-bs = BitStream("stream.bin")
-bs.write_bit_sequence(data, table, freq_bytes)
+
+bs = BitStream("encode.bin")
+bs.encode_bit_sequence(data, table, freq_bytes)
 del bs
-file = open("stream.bin", "rb")
+file = open("encode.bin", "rb")
 data = file.read()
 print(data[1032:])
 bit_string = ''.join(f'{byte:08b}' for byte in data[1032:])
 print(bit_string)
+
+#reading part
+input_read_f = open("encode.bin", "rb")
+fulldata = input_read_f.read()
+freq_bytes = fulldata[:1024]
+length = unpack('>Q', fulldata[1024:1032])[0]
+data = fulldata[1032:]
+
+root = huffman_tree(freq_bytes)
+table = code_table(root)
+
+bs = BitStream("decode.bin")
+bs.decode_bit_sequence(data, table, length)
+del bs
+file = open("decode.bin", "rb")
+data = file.read()
+print(data)
+
+#decode data, save as bytes to new file
+#profit?
