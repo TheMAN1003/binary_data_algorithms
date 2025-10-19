@@ -47,8 +47,8 @@ def code_table(node, prefix="", table=None):
     if node.symbol is not None:
         table[node.symbol] = prefix
     else:
-        code_table(node.left, prefix + "0", table)
-        code_table(node.right, prefix + "1", table)
+        code_table(node.left, prefix + "1", table)
+        code_table(node.right, prefix + "0", table)
 
     return table
 
