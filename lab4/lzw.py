@@ -180,7 +180,7 @@ class LZW:
 file = open("input.txt", "rb")
 input = file.read()
 
-lzw = LZW(256)
+lzw = LZW(1048576) # макс довжина 2^20
 
 lzw.encode(input, "res.bin")
 
