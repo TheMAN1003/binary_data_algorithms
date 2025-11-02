@@ -74,8 +74,10 @@ class LZW:
 
     def reset(self):
         self.dictionary = {(i, None): i for i in range(256)}
+        self.dictionary[(256, None)] = 0
         self.dictionary_dec = {i : (i, None) for i in range(256)}
-        self.current_bit_length = 8
+        self.dictionary_dec[256] = 0
+        self.current_bit_length = 9
 
     @staticmethod
     def toByte(input:int):
@@ -91,8 +93,12 @@ class LZW:
                 bs.write_bit_sequence(self.I.to_bytes(4, byteorder='little'), self.current_bit_length)
                 if len(self.dictionary) == (1 << self.current_bit_length):
                     self.current_bit_length += 1
-                if len(self.dictionary) == self.max_length:
+                if len(self.dictionary) >= self.max_length:
+                    self.I = 256
+                    bs.write_bit_sequence(self.I.to_bytes(4, byteorder='little'), self.current_bit_length)
                     self.reset()
+                    self.I = byte
+                    continue
                 self.dictionary[(byte, self.I)] = len(self.dictionary)
                 self.S = (byte, None)
                 self.I = byte
@@ -149,13 +155,14 @@ class LZW:
                 break
             self.I = self.listToInt(bytelist)
             if self.I in self.dictionary_dec:
+                if self.I == 256:                    
+                    self.reset()
+                    continue
                 self.S = self.dictionary_dec[self.I]
                 result += self.getString()
                 self.dictionary_dec[len(self.dictionary_dec)] = (self.S[0], old_I)
                 if len(self.dictionary_dec) == (1 << self.current_bit_length):
                     self.current_bit_length += 1
-                if len(self.dictionary_dec) == self.max_length:
-                    self.reset()
                 old_I = self.I
                 old_S = self.S
             else:
@@ -173,12 +180,10 @@ class LZW:
 file = open("input.txt", "rb")
 input = file.read()
 
-lzw = LZW(4000)
+lzw = LZW(256)
 
 lzw.encode(input, "res.bin")
 
 output = lzw.decode("res.bin")
 file = open("decode.txt", "wb+")
 file.write(output)
-
-print("1")
