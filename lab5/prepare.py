@@ -1,4 +1,6 @@
 import struct
+import os
+import re
 
 def mtf(data):
     res = bytearray(b'')
@@ -83,13 +85,45 @@ def bwt_decode(encoded: bytes) -> bytes:
 
     return bytes(out)
 
+def ensure_folder(name):
+    if not os.path.exists(name):
+        os.makedirs(name)
 
-text = b"ccccbdbdeee"
+def process_files():
+    ensure_folder("bwt")
+    ensure_folder("mtf")
+    ensure_folder("bwtmtf")
 
-encoded = bwt_encode(text)
-decoded = bwt_decode(encoded)
-twice = mtf(encoded)
+    # pattern = re.compile(r"^(10|[1-9])\.(txt|pdf|exe|doc)$", re.IGNORECASE)
+    pattern = re.compile(r"^(10|[1-9])\.(mp4)$", re.IGNORECASE)
 
-print(encoded)
-print(decoded)
-print(twice)
+    for filename in os.listdir("."):
+        if not pattern.match(filename):
+            continue
+
+        print(f"Processing: {filename}")
+
+        with open(filename, "rb") as f:
+            data = f.read()
+
+        base = filename
+
+        bwt_data = bwt_encode(data)
+        with open(os.path.join("bwt", base + ".bwt"), "wb") as f:
+            f.write(bwt_data)
+            print(f"bwt done for {filename}")
+
+        mtf_data = mtf(data)
+        with open(os.path.join("mtf", base + ".mtf"), "wb") as f:
+            f.write(mtf_data)
+            print(f"mtf1 done for {filename}")
+
+        bwtmtf_data = mtf(bwt_data)
+        with open(os.path.join("bwtmtf", base + ".bwtmtf"), "wb") as f:
+            f.write(bwtmtf_data)
+
+        print(f"Done: {filename}")
+
+
+process_files()
+print("All files processed.")
